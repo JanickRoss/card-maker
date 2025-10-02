@@ -137,20 +137,28 @@ export class PresidentGame extends Game {
    * Check if play is valid
    */
   isValidPlay(playerId: string, cards: Card[]): boolean {
+    console.log(`🎴 Validating play for ${playerId}:`, cards.map(c => `${c.rank}${c.suit}`));
+    console.log(`   Is first turn: ${this.isFirstTurn}`);
+    console.log(`   Last played: ${this.state.playedCards.length} cards`);
+
     if (!isValidCardSet(cards)) {
+      console.log(`   ❌ Invalid card set (not all same rank)`);
       return false;
     }
 
     // First turn must include 3 of clubs
     if (this.isFirstTurn && !mustPlayThreeOfClubs(cards, true)) {
+      console.log(`   ❌ First turn must include 3 of clubs`);
       return false;
     }
 
     // Must beat last play
     if (!beatsLastPlay(cards, this.state.playedCards)) {
+      console.log(`   ❌ Doesn't beat last play`);
       return false;
     }
 
+    console.log(`   ✅ Valid play!`);
     return true;
   }
 
