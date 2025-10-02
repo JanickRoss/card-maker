@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SocketProvider } from "@/components/providers/SocketProvider";
 
 export const metadata: Metadata = {
   title: "Card Game Maker",
@@ -13,7 +14,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body>{children}</body>
+      <body>
+        <SocketProvider>
+          {children}
+        </SocketProvider>
+      </body>
     </html>
   );
 }

@@ -1,32 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useGame } from "@/hooks/useGame";
 
 export default function CreatePage() {
   const router = useRouter();
-  const { createGame } = useGame();
+  const { createGame, gameState } = useGame();
   const [playerName, setPlayerName] = useState("");
   const [maxPlayers, setMaxPlayers] = useState(6);
   const [isCreating, setIsCreating] = useState(false);
 
-  const handleCreate = async () => {
+  // Navigate to lobby when game is created
+  useEffect(() => {
+    if (isCreating && gameState?.code) {
+      router.push("/lobby");
+    }
+  }, [gameState?.code, isCreating, router]);
+
+  const handleCreate = () => {
     if (!playerName.trim()) {
       alert("Veuillez entrer votre nom");
       return;
     }
 
     setIsCreating(true);
-
-    try {
-      await createGame(playerName, maxPlayers);
-      // Navigation will be handled after receiving game code from socket
-      router.push("/lobby");
-    } catch (error) {
-      console.error("Failed to create game:", error);
-      setIsCreating(false);
-    }
+    createGame(playerName, maxPlayers);
   };
 
   return (

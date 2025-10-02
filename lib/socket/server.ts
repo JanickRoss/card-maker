@@ -34,11 +34,12 @@ export function initSocketServer(httpServer: HTTPServer) {
   });
 
   io.on("connection", (socket) => {
-    console.log("Client connected:", socket.id);
+    console.log("✅ Client connected:", socket.id);
 
     // Create game
     socket.on(SOCKET_EVENTS.CREATE_GAME, ({ playerName, gameConfig }) => {
       try {
+        console.log(`🎮 Creating game for player: ${playerName}`);
         const sanitizedName = sanitizePlayerName(playerName);
         const { game, player, code } = gameManager.createGame(
           sanitizedName,
@@ -51,6 +52,8 @@ export function initSocketServer(httpServer: HTTPServer) {
 
         // Join socket room
         socket.join(code);
+
+        console.log(`✅ Game created: ${code} by ${sanitizedName} (${player.id})`);
 
         // Send success response
         socket.emit(SOCKET_EVENTS.GAME_CREATED, {
@@ -65,6 +68,7 @@ export function initSocketServer(httpServer: HTTPServer) {
           players: gameInfo.players,
         });
       } catch (error) {
+        console.error("❌ Error creating game:", error);
         socket.emit(SOCKET_EVENTS.ERROR, {
           message: error instanceof Error ? error.message : "Failed to create game",
         });
@@ -74,6 +78,7 @@ export function initSocketServer(httpServer: HTTPServer) {
     // Join game
     socket.on(SOCKET_EVENTS.JOIN_GAME, ({ gameCode, playerName }) => {
       try {
+        console.log(`👤 Player ${playerName} trying to join game ${gameCode}`);
         const sanitizedName = sanitizePlayerName(playerName);
         const { game, player } = gameManager.joinGame(gameCode, sanitizedName);
 
@@ -83,6 +88,8 @@ export function initSocketServer(httpServer: HTTPServer) {
 
         // Join socket room
         socket.join(gameCode);
+
+        console.log(`✅ Player ${sanitizedName} (${player.id}) joined game ${gameCode}`);
 
         // Notify player
         const gameInfo = game.getGameInfo();
@@ -97,6 +104,7 @@ export function initSocketServer(httpServer: HTTPServer) {
           player: player.toPublicData(),
         });
       } catch (error) {
+        console.error(`❌ Error joining game ${gameCode}:`, error);
         socket.emit(SOCKET_EVENTS.ERROR, {
           message: error instanceof Error ? error.message : ERROR_MESSAGES.GAME_NOT_FOUND,
         });

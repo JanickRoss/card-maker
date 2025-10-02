@@ -1,17 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useGame } from "@/hooks/useGame";
 
 export default function JoinPage() {
   const router = useRouter();
-  const { joinGame } = useGame();
+  const { joinGame, gameState } = useGame();
   const [playerName, setPlayerName] = useState("");
   const [gameCode, setGameCode] = useState("");
   const [isJoining, setIsJoining] = useState(false);
 
-  const handleJoin = async () => {
+  // Navigate to lobby when successfully joined
+  useEffect(() => {
+    if (isJoining && gameState?.code) {
+      router.push("/lobby");
+    }
+  }, [gameState?.code, isJoining, router]);
+
+  const handleJoin = () => {
     if (!playerName.trim()) {
       alert("Veuillez entrer votre nom");
       return;
@@ -23,14 +30,7 @@ export default function JoinPage() {
     }
 
     setIsJoining(true);
-
-    try {
-      await joinGame(gameCode.toUpperCase(), playerName);
-      router.push("/lobby");
-    } catch (error) {
-      console.error("Failed to join game:", error);
-      setIsJoining(false);
-    }
+    joinGame(gameCode.toUpperCase(), playerName);
   };
 
   return (

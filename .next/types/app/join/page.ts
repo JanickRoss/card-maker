@@ -1,4 +1,4 @@
-// File: C:\DEV\Fantabulous-organisation\card-maker\app\join\page.tsx
+// File: c:\DEV\Fantabulous-organisation\card-maker\app\join\page.tsx
 import * as entry from '../../../../app/join/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
