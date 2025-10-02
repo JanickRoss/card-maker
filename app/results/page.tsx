@@ -5,10 +5,10 @@ import { useGame } from "@/hooks/useGame";
 
 export default function ResultsPage() {
   const router = useRouter();
-  const { players, reset } = useGame();
+  const { players, leaveGame } = useGame();
 
   const handleNewGame = () => {
-    reset();
+    leaveGame();
     router.push("/");
   };
 

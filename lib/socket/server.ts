@@ -149,8 +149,9 @@ export function initSocketServer(httpServer: HTTPServer) {
 
       try {
         const game = gameManager.getGame(gameCode);
-        const player = game?.getPlayer(playerId);
+        if (!game) throw new Error(ERROR_MESSAGES.GAME_NOT_FOUND);
 
+        const player = game.getPlayer(playerId);
         if (!player?.isHost) {
           throw new Error("Only host can start the game");
         }

@@ -152,8 +152,8 @@ export class PresidentGame extends Game {
       return false;
     }
 
-    // Must beat last play
-    if (!beatsLastPlay(cards, this.state.playedCards)) {
+    // Must beat last play (cast to Card[] with methods)
+    if (!beatsLastPlay(cards, this.state.playedCards as unknown as Card[])) {
       console.log(`   ❌ Doesn't beat last play`);
       return false;
     }
