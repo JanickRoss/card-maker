@@ -2,6 +2,29 @@ import { Card } from "../base/Card";
 import { Rank, Suit } from "@/types/game";
 
 /**
+ * Get numeric value for card comparison
+ * 3 = 0, 4 = 1, ..., A = 11, 2 = 12 (highest)
+ */
+export function getCardValue(card: { rank: Rank }): number {
+  const rankOrder = [
+    Rank.THREE,
+    Rank.FOUR,
+    Rank.FIVE,
+    Rank.SIX,
+    Rank.SEVEN,
+    Rank.EIGHT,
+    Rank.NINE,
+    Rank.TEN,
+    Rank.JACK,
+    Rank.QUEEN,
+    Rank.KING,
+    Rank.ACE,
+    Rank.TWO,
+  ];
+  return rankOrder.indexOf(card.rank);
+}
+
+/**
  * Validate if cards played are valid for President game
  */
 export function isValidCardSet(cards: Card[]): boolean {
@@ -26,7 +49,7 @@ export function beatsLastPlay(newCards: Card[], lastCards: Card[]): boolean {
   if (!isValidCardSet(newCards)) return false;
 
   // New cards must be higher value
-  return newCards[0].getValue() > lastCards[0].getValue();
+  return getCardValue(newCards[0]) > getCardValue(lastCards[0]);
 }
 
 /**
@@ -92,11 +115,11 @@ export function getPlayableCards(hand: Card[], lastPlay: Card[]): Card[][] {
   } else {
     // Must beat last play
     const requiredCount = lastPlay.length;
-    const minValue = lastPlay[0].getValue();
+    const minValue = getCardValue(lastPlay[0]);
 
     const grouped = groupCardsByRank(hand);
     grouped.forEach(cards => {
-      if (cards.length >= requiredCount && cards[0].getValue() > minValue) {
+      if (cards.length >= requiredCount && getCardValue(cards[0]) > minValue) {
         playable.push(cards.slice(0, requiredCount));
       }
     });

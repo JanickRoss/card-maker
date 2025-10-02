@@ -10,6 +10,7 @@ import {
 import { gameManager } from "./GameManager";
 import { SOCKET_EVENTS, ERROR_MESSAGES } from "@/utils/constants";
 import { sanitizePlayerName } from "@/utils/gameHelpers";
+import { Card } from "../games/base/Card";
 
 let io: SocketIOServer<
   ClientToServerEvents,
@@ -197,10 +198,14 @@ export function initSocketServer(httpServer: HTTPServer) {
       if (!playerId || !gameCode) return;
 
       try {
+        console.log(`🎴 Player ${playerId} trying to play cards:`, cards);
         const game = gameManager.getGame(gameCode);
         if (!game) throw new Error(ERROR_MESSAGES.GAME_NOT_FOUND);
 
-        game.playCards(playerId, cards);
+        // Convert plain card objects to Card instances
+        const cardInstances = cards.map((c: any) => new Card(c.suit, c.rank));
+
+        game.playCards(playerId, cardInstances);
 
         // Notify all players
         io?.to(gameCode).emit(SOCKET_EVENTS.CARDS_PLAYED, {

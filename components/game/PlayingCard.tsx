@@ -18,8 +18,8 @@ export function PlayingCard({ card, selected = false, onClick, size = "md" }: Pl
   const suitColors = {
     [Suit.HEARTS]: "text-card-red",
     [Suit.DIAMONDS]: "text-card-red",
-    [Suit.CLUBS]: "text-text-primary",
-    [Suit.SPADES]: "text-text-primary",
+    [Suit.CLUBS]: "text-gray-900",
+    [Suit.SPADES]: "text-gray-900",
   };
 
   const sizes = {
