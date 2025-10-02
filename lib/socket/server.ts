@@ -138,8 +138,13 @@ export function initSocketServer(httpServer: HTTPServer) {
 
     // Start game
     socket.on(SOCKET_EVENTS.START_GAME, () => {
+      console.log(`🎬 START_GAME event received from socket ${socket.id}`);
       const { playerId, gameCode } = socket.data;
-      if (!playerId || !gameCode) return;
+      console.log(`   playerId: ${playerId}, gameCode: ${gameCode}`);
+      if (!playerId || !gameCode) {
+        console.error(`❌ Missing socket data! playerId: ${playerId}, gameCode: ${gameCode}`);
+        return;
+      }
 
       try {
         const game = gameManager.getGame(gameCode);
@@ -149,10 +154,12 @@ export function initSocketServer(httpServer: HTTPServer) {
           throw new Error("Only host can start the game");
         }
 
+        console.log(`🚀 Starting game: ${gameCode}`);
         game.start();
 
         // Send game state to all players
         const gameInfo = game.getGameInfo();
+        console.log(`📤 Sending GAME_STARTED to all players in room ${gameCode}`);
 
         // Send public game state to all
         io?.to(gameCode).emit(SOCKET_EVENTS.GAME_STARTED, {

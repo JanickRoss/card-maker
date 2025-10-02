@@ -59,6 +59,14 @@ export function useGame() {
       setGameState(gameState);
       setPlayers(players);
 
+      // Set current player from currentPlayerIndex
+      if (gameState.currentPlayerIndex >= 0 && gameState.currentPlayerIndex < players.length) {
+        const currentPlayer = players[gameState.currentPlayerIndex];
+        if (currentPlayer) {
+          setCurrentPlayer(currentPlayer.id);
+        }
+      }
+
       // Extract my hand
       const me = players.find(p => p.id === myPlayerId);
       if (me && 'hand' in me) {
@@ -70,6 +78,14 @@ export function useGame() {
     socket.on(SOCKET_EVENTS.GAME_STATE, ({ gameState, players }) => {
       setGameState(gameState);
       setPlayers(players);
+
+      // Set current player from currentPlayerIndex
+      if (gameState.currentPlayerIndex >= 0 && gameState.currentPlayerIndex < players.length) {
+        const currentPlayer = players[gameState.currentPlayerIndex];
+        if (currentPlayer) {
+          setCurrentPlayer(currentPlayer.id);
+        }
+      }
 
       // Extract my hand
       const me = players.find(p => p.id === myPlayerId);
