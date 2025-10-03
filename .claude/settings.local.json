@@ -13,7 +13,9 @@
       "Bash(npm run build:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nPhase 1 Complete - Ready for Railway deployment\n\n✅ Features:\n- Complete President/Trou de cul game implementation\n- Real-time multiplayer with Socket.io\n- Responsive UI with Tailwind CSS 4\n- Full game logic with turn management and rank assignment\n\n✅ Tests:\n- 46 unit tests (100% pass)\n- Vitest configuration\n- Tests for game rules, Card, and Deck classes\n\n✅ Documentation:\n- Complete README.md with user guide\n- CONTRIBUTING.md for developers\n- DEPLOYMENT.md with Railway/Render/Vercel guides\n- Updated CAHIER_DES_CHARGES.md\n\n✅ Deployment Ready:\n- Production build successful\n- Package.json optimized for deployment\n- Environment variables configured\n- TypeScript errors fixed\n\n🚀 Ready to deploy on Railway!\n\nGenerated with Claude Code\nhttps://claude.com/claude-code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(tasklist)",
+      "Bash(npm run lint)"
     ],
     "deny": [],
     "ask": []

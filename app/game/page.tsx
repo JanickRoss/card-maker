@@ -37,7 +37,7 @@ export default function GamePage() {
     if (gameState?.status === "finished") {
       router.push("/results");
     }
-  }, [gameState?.status, router]);
+  }, [gameState, router]);
 
   // Toast notifications for turn changes
   useEffect(() => {
