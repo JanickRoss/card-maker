@@ -30,6 +30,9 @@ export function useGame() {
     // Game created
     socket.on(SOCKET_EVENTS.GAME_CREATED, ({ gameCode, playerId }) => {
       setMyPlayerId(playerId);
+      // Save to localStorage for reconnection
+      localStorage.setItem('gameCode', gameCode);
+      localStorage.setItem('playerId', playerId);
     });
 
     // Game joined
@@ -37,6 +40,9 @@ export function useGame() {
       setMyPlayerId(playerId);
       setGameState(gameState);
       setPlayers(players);
+      // Save to localStorage for reconnection
+      localStorage.setItem('gameCode', gameState.code);
+      localStorage.setItem('playerId', playerId);
     });
 
     // Player joined
@@ -160,6 +166,17 @@ export function useGame() {
 
   const leaveGame = () => {
     socket?.emit(SOCKET_EVENTS.LEAVE_GAME);
+    // Clear localStorage
+    localStorage.removeItem('gameCode');
+    localStorage.removeItem('playerId');
+  };
+
+  // Get saved game info for reconnection
+  const getSavedGameInfo = () => {
+    if (typeof window === 'undefined') return null;
+    const gameCode = localStorage.getItem('gameCode');
+    const playerId = localStorage.getItem('playerId');
+    return gameCode && playerId ? { gameCode, playerId } : null;
   };
 
   return {
@@ -180,5 +197,6 @@ export function useGame() {
     playCards,
     passTurn,
     leaveGame,
+    getSavedGameInfo,
   };
 }

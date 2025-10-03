@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useGame } from "@/hooks/useGame";
 import { PlayingCard } from "@/components/game/PlayingCard";
 import { Card } from "@/types/game";
+import { useToast } from "@/hooks/useToast";
+import { ToastContainer } from "@/components/ui/Toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function GamePage() {
   const router = useRouter();
@@ -21,6 +24,8 @@ export default function GamePage() {
   } = useGame();
 
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
+  const [previousTurn, setPreviousTurn] = useState<string | null>(null);
+  const { toasts, success, info, warning } = useToast();
 
   useEffect(() => {
     // Redirect if game not started
@@ -33,6 +38,22 @@ export default function GamePage() {
       router.push("/results");
     }
   }, [gameState?.status, router]);
+
+  // Toast notifications for turn changes
+  useEffect(() => {
+    if (!currentPlayerId || !me) return;
+
+    if (previousTurn !== null && previousTurn !== currentPlayerId) {
+      const currentPlayer = players.find(p => p.id === currentPlayerId);
+      if (currentPlayerId === me.id) {
+        info("🎯 C'est votre tour !", 2000);
+      } else if (currentPlayer) {
+        info(`Tour de ${currentPlayer.name}`, 2000);
+      }
+    }
+
+    setPreviousTurn(currentPlayerId);
+  }, [currentPlayerId, me, players, previousTurn, info]);
 
   const toggleCardSelection = (card: Card) => {
     setSelectedCards(prev => {
@@ -52,11 +73,13 @@ export default function GamePage() {
   const handlePlayCards = () => {
     if (selectedCards.length === 0) return;
     playCards(selectedCards);
+    success(`${selectedCards.length} carte${selectedCards.length > 1 ? 's' : ''} jouée${selectedCards.length > 1 ? 's' : ''} !`);
     setSelectedCards([]);
   };
 
   const handlePass = () => {
     passTurn();
+    warning("Vous passez votre tour");
     setSelectedCards([]);
   };
 
@@ -74,7 +97,7 @@ export default function GamePage() {
   if (!gameState || !me) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <p className="text-text-secondary">Chargement...</p>
+        <LoadingSpinner size="lg" text="Chargement de la partie..." />
       </main>
     );
   }
@@ -101,13 +124,18 @@ export default function GamePage() {
         {/* Other players */}
         <div className="mb-8">
           <div className="grid grid-cols-3 gap-4">
-            {otherPlayers.map((player) => (
+            {otherPlayers.map((player, index) => (
               <div
                 key={player.id}
                 className={`
-                  bg-surface rounded-lg p-4
-                  ${player.id === currentPlayerId ? "ring-2 ring-primary" : ""}
+                  bg-surface rounded-lg p-4 transition-all duration-300
+                  ${player.id === currentPlayerId ? "ring-2 ring-primary animate-[pulse-ring_1s_ease-in-out_infinite]" : ""}
+                  animate-[slideIn_0.3s_ease-out] opacity-0
                 `}
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                  animationFillMode: 'forwards'
+                }}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium">{player.name}</span>
@@ -130,21 +158,31 @@ export default function GamePage() {
         </div>
 
         {/* Center - Last played cards */}
-        <div className="bg-surface/50 rounded-lg p-8 mb-8 min-h-[200px] flex flex-col items-center justify-center">
-          <p className="text-sm text-text-secondary mb-4">
+        <div className="bg-surface/50 rounded-lg p-8 mb-8 min-h-[200px] flex flex-col items-center justify-center transition-all duration-500">
+          <p className={`text-sm mb-4 transition-all duration-300 ${
+            currentPlayer?.id === me.id
+              ? "text-accent font-bold text-lg animate-[pulse-ring_1.5s_ease-in-out_infinite]"
+              : "text-text-secondary"
+          }`}>
             {currentPlayer?.id === me.id
-              ? "C'est votre tour !"
+              ? "🎯 C'est votre tour !"
               : `Tour de ${currentPlayer?.name}`}
           </p>
 
           {lastPlayedCards.length > 0 && (
-            <div>
+            <div className="animate-[fadeIn_0.4s_ease-out]">
               <p className="text-xs text-text-muted mb-2 text-center">
                 Dernières cartes jouées:
               </p>
               <div className="flex gap-2 justify-center">
-                {lastPlayedCards.map((card) => (
-                  <PlayingCard key={card.id} card={card} size="md" />
+                {lastPlayedCards.map((card, index) => (
+                  <div
+                    key={card.id}
+                    className="animate-[dealCard_0.3s_ease-out]"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <PlayingCard card={card} size="md" />
+                  </div>
                 ))}
               </div>
             </div>
@@ -170,13 +208,19 @@ export default function GamePage() {
 
           {/* Cards */}
           <div className="flex gap-2 flex-wrap mb-4 justify-center">
-            {myHand.map((card) => (
-              <PlayingCard
+            {myHand.map((card, index) => (
+              <div
                 key={card.id}
-                card={card}
-                selected={selectedCards.some(c => c.id === card.id)}
-                onClick={() => isMyTurn && toggleCardSelection(card)}
-              />
+                className="animate-[dealCard_0.4s_ease-out]"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <PlayingCard
+                  card={card}
+                  selected={selectedCards.some(c => c.id === card.id)}
+                  onClick={() => isMyTurn && toggleCardSelection(card)}
+                  animate={true}
+                />
+              </div>
             ))}
           </div>
 
@@ -185,20 +229,23 @@ export default function GamePage() {
             <button
               onClick={handlePass}
               disabled={!isMyTurn}
-              className="px-6 py-3 bg-surface hover:bg-background border border-primary/20 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-surface hover:bg-background border border-primary/20 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
             >
               Passer
             </button>
             <button
               onClick={handlePlayCards}
               disabled={!isMyTurn || selectedCards.length === 0}
-              className="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
             >
               Jouer {selectedCards.length > 0 && `(${selectedCards.length})`}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Toast notifications */}
+      <ToastContainer toasts={toasts} />
     </main>
   );
 }

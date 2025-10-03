@@ -5,9 +5,16 @@ interface PlayingCardProps {
   selected?: boolean;
   onClick?: () => void;
   size?: "sm" | "md" | "lg";
+  animate?: boolean;
 }
 
-export function PlayingCard({ card, selected = false, onClick, size = "md" }: PlayingCardProps) {
+export function PlayingCard({
+  card,
+  selected = false,
+  onClick,
+  size = "md",
+  animate = false
+}: PlayingCardProps) {
   const suitSymbols = {
     [Suit.HEARTS]: "♥",
     [Suit.DIAMONDS]: "♦",
@@ -37,19 +44,20 @@ export function PlayingCard({ card, selected = false, onClick, size = "md" }: Pl
         bg-white rounded-lg shadow-lg
         flex flex-col items-center justify-between
         p-2
-        transition-all
-        ${onClick ? "cursor-pointer hover:scale-105" : "cursor-default"}
-        ${selected ? "ring-4 ring-primary -translate-y-2" : ""}
-        ${!onClick ? "opacity-90" : ""}
+        transition-all duration-300 ease-in-out
+        ${onClick ? "cursor-pointer hover:scale-110 hover:shadow-xl hover:-translate-y-1" : "cursor-default"}
+        ${selected ? "ring-4 ring-primary -translate-y-3 scale-105 shadow-2xl" : ""}
+        ${!onClick ? "opacity-90" : "hover:brightness-105"}
+        ${animate ? "animate-[dealCard_0.3s_ease-out]" : ""}
       `}
     >
-      <span className={`font-bold ${suitColors[card.suit]}`}>
+      <span className={`font-bold ${suitColors[card.suit]} transition-colors`}>
         {card.rank}
       </span>
-      <span className={`text-2xl ${suitColors[card.suit]}`}>
+      <span className={`text-2xl ${suitColors[card.suit]} transition-all`}>
         {suitSymbols[card.suit]}
       </span>
-      <span className={`font-bold ${suitColors[card.suit]}`}>
+      <span className={`font-bold ${suitColors[card.suit]} transition-colors`}>
         {card.rank}
       </span>
     </button>

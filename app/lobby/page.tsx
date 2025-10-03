@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGame } from "@/hooks/useGame";
+import { useToast } from "@/hooks/useToast";
+import { ToastContainer } from "@/components/ui/Toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function LobbyPage() {
   const router = useRouter();
@@ -16,6 +19,8 @@ export default function LobbyPage() {
   } = useGame();
 
   const [copied, setCopied] = useState(false);
+  const [previousPlayerCount, setPreviousPlayerCount] = useState(0);
+  const { toasts, success, info } = useToast();
 
   useEffect(() => {
     // Redirect to game when started
@@ -24,10 +29,30 @@ export default function LobbyPage() {
     }
   }, [gameState?.status, router]);
 
+  // Toast notifications for player join/leave
+  useEffect(() => {
+    if (previousPlayerCount === 0) {
+      setPreviousPlayerCount(players.length);
+      return;
+    }
+
+    if (players.length > previousPlayerCount) {
+      const newPlayer = players[players.length - 1];
+      if (newPlayer.id !== me?.id) {
+        info(`${newPlayer.name} a rejoint la partie`, 2000);
+      }
+    } else if (players.length < previousPlayerCount) {
+      info("Un joueur a quitté la partie", 2000);
+    }
+
+    setPreviousPlayerCount(players.length);
+  }, [players, previousPlayerCount, me, info]);
+
   const handleCopyCode = () => {
     if (gameState?.code) {
       navigator.clipboard.writeText(gameState.code);
       setCopied(true);
+      success("Code copié !", 1500);
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -42,9 +67,7 @@ export default function LobbyPage() {
   if (!gameState) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-text-secondary">Chargement...</p>
-        </div>
+        <LoadingSpinner size="lg" text="Chargement du salon..." />
       </main>
     );
   }
@@ -144,6 +167,9 @@ export default function LobbyPage() {
           )}
         </div>
       </div>
+
+      {/* Toast notifications */}
+      <ToastContainer toasts={toasts} />
     </main>
   );
 }
